@@ -6,10 +6,4 @@ export type ControlPointName =
   | "midPointA"
   | "midPointB";
 
-export interface ControlPoints {
-  startPoint: Vector3Tuple;
-  endPoint: Vector3Tuple;
-  midPointA: Vector3Tuple;
-  midPointB: Vector3Tuple;
-  color: string;
-}
+export type ControlPoints = Vector3Tuple[];

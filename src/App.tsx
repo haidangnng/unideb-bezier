@@ -1,16 +1,26 @@
-import { Canvas } from "@react-three/fiber";
-import { BezierCurveEditor } from "./components/bezier-curve-editor";
-import { OrbitControls } from "@react-three/drei";
-import Controller from "./components/controller";
+import Controller from "./components/control/controller";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import CurveFunc from "./components/curve-func";
-import { ModeToggle } from "./components/mode-toggle";
+import { ModeToggle } from "./components/theme/mode-toggle";
+import Scene from "./components/display/scene";
+import DerivativeGraph from "./components/graph";
+import { useSegmentStore } from "./lib/store";
+import { useMemo } from "react";
 
 function App() {
+  const selectedSurfacePoint = useSegmentStore((s) => s.selectedSurfacePoint);
+  const normal = useSegmentStore((s) => s.normal);
+  const Xu = useSegmentStore((s) => s.Xu);
+  const Xv = useSegmentStore((s) => s.Xv);
+
+  const showDerivatives = useMemo(
+    () => normal && Xu && Xv && selectedSurfacePoint,
+    [Xu, Xv, normal, selectedSurfacePoint],
+  );
+
   return (
     <div className="h-screen w-screen relative">
       <div className="absolute right-4 top-4 z-10">
@@ -23,29 +33,27 @@ function App() {
 
         <ResizableHandle />
 
-        <ResizablePanel>
+        <ResizablePanel defaultSize={50}>
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel>
-              <Canvas
-                id="canvas"
-                dpr={window.devicePixelRatio}
-                camera={{
-                  position: [0, 5, 20],
-                  near: 0.01,
-                  far: 100,
-                  fov: 45,
-                }}
-              >
-                <ambientLight intensity={2} />
-                <gridHelper args={[20, 20]} />
-                <OrbitControls makeDefault />
-
-                <BezierCurveEditor />
-              </Canvas>
+            <ResizablePanel defaultSize={25}>
+              <div className="flex h-full items-center justify-center p-6">
+                <Scene />
+              </div>
             </ResizablePanel>
             <ResizableHandle />
-            <ResizablePanel defaultSize={20}>
-              <CurveFunc />
+            <ResizablePanel defaultSize={10}>
+              <div className="flex h-full items-center justify-center p-6">
+                {showDerivatives ? (
+                  <DerivativeGraph
+                    selectedPoint={selectedSurfacePoint}
+                    normal={normal}
+                    Xu={Xu}
+                    Xv={Xv}
+                  />
+                ) : (
+                  <p>Create Curves and Select a point</p>
+                )}
+              </div>
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
